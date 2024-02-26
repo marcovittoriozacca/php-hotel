@@ -41,13 +41,13 @@
     ];
     $keys = array_keys($hotels[0]);
 
-
-
+    // parking filter elements
     $parking = $_GET['parking'] ?? 'all';
+    $rating = $_GET['rating'] ?? 'all';
 
     //text visible on the select area
-    function selectText($parkingVar){
-        switch ($parkingVar) {
+    function selectText($var){
+        switch ($var) {
             case 'all':
                 return 'Tutti';
                 break;
@@ -57,31 +57,33 @@
             case 'false':
                 return 'Senza Parcheggio';
                 break;
+            default:
+                return $var;
+                break;
         }
-    }
-    //will filter and pass the array based on the parking value (true, false or all)
-    function getArray($arr, $parkingVar){
-        $filteredArray = [];
-        if($parkingVar === 'all'){
-            return $arr;
-        }
-        if($parkingVar == 'true'){
-            foreach ($arr as $element) {
-                if ($element['parking'] === true) {
-                    $filteredArray[] = $element;  
-                }
-            }
-            return $filteredArray;
-        }else{
-            foreach ($arr as $element) {
-                if ($element['parking'] === false) {
-                    $filteredArray[] = $element;
-                }
-            }
-        }
-        return $filteredArray;
     }
 
+    // function that filters hotels based on the inputs
+    function filterHotels($hotels, $parking, $rating)
+    {
+        $filteredArray = [];
+        $filteredArray = array_filter($hotels, function ($hotel) use ($parking, $rating) {
+            // $parking == 'all' checks if the "all" option is selected
+            // ($parking == 'true' && $hotel['parking'] == true) checks if the key "parking" is true and the option "Con Parcheggio" is selected
+            // ($parking == 'false' && $hotel['parking'] == false) same as the line above but for the "Senza Parcheggio" ones
+            // $rating == 'all' || $hotel['vote'] >= $rating) checks if there is a selected Rating in the second select or if the value is 'all'
+            if (
+                ($parking == 'all' || ($parking == 'true' && $hotel['parking'] == true) || ($parking == 'false' && $hotel['parking'] == false))
+                &&
+                ($rating == 'all' || $hotel['vote'] >= $rating))
+                {
+                    return true;
+                }else{
+                    return false;
+                }
+        });
+        return $filteredArray;
+    }
 ?>
 
 <!DOCTYPE html>
@@ -94,7 +96,7 @@
 </head>
 <body>
     
-    <header class="text-center py-2">
+    <header class="text-center py-3">
         <h1>HOTEL</h1>
     </header>
 
@@ -106,15 +108,25 @@
                 <div class="col-6">
                     <div class="mb-5">
                         <form action="index.php" method="GET" class="d-flex column-gap-3">
-
-                            <select name="parking" id="parking" class="form-select w-50">
-                                <option value="<?= $parking ?>" selected hidden><?= selectText($parking)?></option>
+                            <div class="w-50">
+                                <select name="parking" id="parking" class="form-select">
+                                    <option value="<?= $parking ?>" selected hidden><?= selectText($parking)?></option>
+                                    <option value="all">Tutti</option>
+                                    <option value="false">Senza Parcheggio</option>
+                                    <option value="true">Con Parcheggio</option>
+                                </select>
+                            </div>
+                            <div class="w-25">
+                                <select name="rating" id="rating" class="form-select">
+                                <option value="<?= $rating ?>" selected hidden><?= selectText($rating) ?></option>
                                 <option value="all">Tutti</option>
-                                <option value="false">Senza Parcheggio</option>
-                                <option value="true">Con Parcheggio</option>
-                            </select>
+                                    <?php for($i = 1; $i <= 5; $i++): ?>
+                                      <option value="<?= $i ?>"><?= $i ?></option>  
+                                    <?php endfor; ?>
+                                </select>
+                            </div>
 
-                            <button type="submit" class="btn btn-primary">Filtra</button>
+                            <button type="submit" class="btn btn-sm btn-primary">Filtra</button>
                         </form>
                     </div>
                 </div>
@@ -131,7 +143,7 @@
                         </thead>
                         <tbody>
 
-                            <?php foreach(getArray($hotels, $parking) as $hotel): ?>
+                            <?php foreach(filterHotels($hotels, $parking, $rating) as $hotel): ?>
                                 <tr class="text-center">
                                 <?php foreach($hotel as $element): ?>
                                     <td> <?= $element ?> </td>
