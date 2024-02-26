@@ -41,6 +41,47 @@
     ];
     $keys = array_keys($hotels[0]);
 
+
+
+    $parking = $_POST['parking'] ?? 'all';
+
+    //text visible on the select area
+    function selectText($parkingVar){
+        switch ($parkingVar) {
+            case 'all':
+                return 'Tutti';
+                break;
+            case 'true':
+                return 'Con Parcheggio';
+                break;
+            case 'false':
+                return 'Senza Parcheggio';
+                break;
+        }
+    }
+    //will filter and pass the array based on the parking value (true, false or all)
+    function getArray($arr, $parkingVar){
+        $filteredArray = [];
+        if($parkingVar === 'all'){
+            return $arr;
+        }
+        if($parkingVar == 'true'){
+            foreach ($arr as $element) {
+                if ($element['parking'] === true) {
+                    $filteredArray[] = $element;  
+                }
+            }
+            return $filteredArray;
+        }else{
+            foreach ($arr as $element) {
+                if ($element['parking'] === false) {
+                    $filteredArray[] = $element;
+                }
+            }
+        }
+        return $filteredArray;
+    }
+
 ?>
 
 <!DOCTYPE html>
@@ -58,7 +99,26 @@
     </header>
 
     <main>
+
         <div class="container">
+
+            <div class="row">
+                <div class="col-6">
+                    <div class="mb-5">
+                        <form action="index.php" method="POST" class="d-flex column-gap-3">
+
+                            <select name="parking" id="parking" class="form-select w-50">
+                                <option value="<?= $parking?>" selected hidden><?= selectText($parking)?></option>
+                                <option value="all">Tutti</option>
+                                <option value="false">Senza Parcheggio</option>
+                                <option value="true">Con Parcheggio</option>
+                            </select>
+
+                            <button type="submit" class="btn btn-primary">Filtra</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
             <div class="row">
                 <div class="col">
                     <table class="table table-striped">
@@ -70,13 +130,15 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <?php foreach($hotels as $hotel): ?>
+
+                            <?php foreach(getArray($hotels, $parking) as $hotel): ?>
                                 <tr class="text-center">
                                 <?php foreach($hotel as $element): ?>
                                     <td> <?= $element ?> </td>
                                 <?php endforeach;?>
                                 </tr>
                             <?php endforeach;?>
+
                         </tbody>
                     </table>
                 </div>
