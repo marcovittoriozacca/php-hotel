@@ -43,7 +43,7 @@
 
 
 
-    $parking = $_POST['parking'] ?? 'all';
+    $parking = $_GET['parking'] ?? 'all';
 
     //text visible on the select area
     function selectText($parkingVar){
@@ -105,10 +105,10 @@
             <div class="row">
                 <div class="col-6">
                     <div class="mb-5">
-                        <form action="index.php" method="POST" class="d-flex column-gap-3">
+                        <form action="index.php" method="GET" class="d-flex column-gap-3">
 
                             <select name="parking" id="parking" class="form-select w-50">
-                                <option value="<?= $parking?>" selected hidden><?= selectText($parking)?></option>
+                                <option value="<?= $parking ?>" selected hidden><?= selectText($parking)?></option>
                                 <option value="all">Tutti</option>
                                 <option value="false">Senza Parcheggio</option>
                                 <option value="true">Con Parcheggio</option>
